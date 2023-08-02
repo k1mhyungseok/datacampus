@@ -12,4 +12,5 @@ if st.checkbox('감자탕'):
     st.text('정보')
 else:
     st.text('hide')
+    st.text('hide2')
 

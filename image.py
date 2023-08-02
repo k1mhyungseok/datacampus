@@ -89,7 +89,7 @@ import pandas as pd
 #     i += 1
 
 count = 0
-
+#주석
 while(1):
     route = input("사진의 경로를 입력하세요: ")
     # route = r'C:/team2_prj/ex_img.png'
