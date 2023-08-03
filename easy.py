@@ -12,7 +12,7 @@ def ocr_image(image_path, lang='ko'):
     return result
 
 def main():
-    st.title('메뉴판 OCR 분석')
+    st.title('메뉴판 이미지 분석')
 
     uploaded_file = st.file_uploader("메뉴 사진을 업로드해주세요.", type=["png", "jpg", "jpeg"])
 
