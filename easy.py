@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import re
 
+## easyocr
 def ocr_image(image_path, lang='ko'):
     reader = easyocr.Reader([lang])
     image = Image.open(image_path)
@@ -18,17 +19,21 @@ def main():
 
     if uploaded_file is not None:
         try:
-            #### OCR 분석을 시작하기 전에 progress bar 생성
+            #### easyocr 시작하기 전에 progress bar 생성
             progress_bar = st.progress(0)
 
+            #### easyocr 진행
             result = ocr_image(uploaded_file)
 
-            #### OCR 분석 완료 후 progress bar를 100%로 설정
+            #### easyocr 완료 후 progress bar를 100%로 설정
             progress_bar.progress(100)
+            
+            #### progress bar 100%시 완료 문구 
             st.success("Done")
 
             st.subheader("원하는 결과를 선택하세요")
 
+            #### 하나씩 출력
             for r in result:
                 top_left, top_right, bottom_right, bottom_left = r[0]
                 text = r[1]
