@@ -1,3 +1,5 @@
+#메뉴판의 음식 이름을 인식하고 버튼 혹은 체크박스를 활용해 사용자가 정보를 확인하고 싶은 메뉴를 선택할 수 있는 UI 제공
+#streamlit을 활용하여 구현했으며, 버튼/체크박스 중 하나의 형식을 선택할 예정
 import streamlit as st
 import numpy as np
 import pandas as pd

@@ -1,3 +1,7 @@
+#easyocr활용 이후 텍스트에서 숫자, 영어, 특수문자를 제거하고 유의미한 메뉴 이름만 출력하는 코드 포함되어 있음
+#python을 활용해 구현
+#다만, '순두부'인데 '순 두부'로 출력되거나, '김치찌개'인데 '김 찌 치 개'등의 오타 및 하나의 단어 안에 띄어쓰기로 구분되어 출력되어 맞춤법 수정 필요
+
 from PIL import Image, ImageDraw
 import easyocr
 import numpy as np
