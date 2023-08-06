@@ -1,0 +1,125 @@
+import streamlit as st
+from PIL import Image
+import pytesseract
+
+# 메뉴판을 불러온 후 원하는 음식 선택
+def main():
+    # Streamlit 앱의 레이아웃 및 설정을 변경
+    st.set_page_config(page_title="YumScan", page_icon=":pizza:", layout="wide")
+
+    st.title("Choose the food you want to get information")
+    st.markdown("<p style='font-size: 25px;'>1.pizza</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 25px;'>2.pasta</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 25px;'>3.coke</p>", unsafe_allow_html=True)
+
+# 음식에 들어있는 재료에 대한 사진과 설명 
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.title("Ingredients")
+    st.markdown("<p style='font-size: 20px;'>The ingredients in this food are as follows.</p>", unsafe_allow_html=True)
+    st.write(" ")
+
+    cols = st.columns(3)
+
+    # 첫 번째 재료 정보 (이미지와 설명)
+    with cols[0]:
+        st.image("vegetable.png", use_column_width=True)
+        st.write("첫 번째 재료 설명")
+    
+    # 두 번째 재료 정보 (이미지와 설명)
+    with cols[1]:
+        st.image("vegetable.png", use_column_width=True)
+        st.write("두 번째 재료 설명")
+
+    # 세 번째 재료 정보 (이미지와 설명)
+    with cols[2]:
+        st.image("vegetable.png", use_column_width=True)
+        st.write("세 번째 재료 설명")
+
+
+# 음식이 유발할 수 있는 알러지에 대한 사진과 설명
+
+    st.title("Allergies")
+    st.markdown("<p style='font-size: 20px;'>This food can cause the following allergies.</p>", unsafe_allow_html=True)
+    st.write(" ")
+    st.write(" ")
+
+    # 알러지에 대한 사진과 설명
+    allergy_data = {
+        "image": "vegetable.png",
+        "description": "알러지에 대한 설명입니다."
+    }
+
+    cols = st.columns(2)
+
+    with cols[0]:
+        st.image(allergy_data["image"], width=200)
+
+    with cols[1]:
+        st.write(allergy_data["description"])
+
+# Spicy-Level (수정예정)
+
+    # 가로선 추가
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.title("Spicy-Level")
+    
+    # 음식별 맵기 정도를 정의
+    spicy_levels = {
+        "김치찌개": 3,
+        "떡볶이": 2,
+        "피자": 1,
+        "샐러드": 0,
+    }
+    
+    # 음식 선택
+    food = st.selectbox("음식 선택", ["김치찌개", "떡볶이", "피자", "샐러드"])
+    
+    # 선택한 음식의 맵기 정도를 슬라이더로 조절할 수 있도록 구현
+    selected_spicy_level = st.slider("맵기 정도 선택", min_value=0, max_value=3, value=spicy_levels[food])
+    
+    # 선택한 음식의 맵기 정도를 업데이트
+    spicy_levels[food] = selected_spicy_level
+    
+    # 선택한 음식과 맵기 정도를 출력
+    st.write(f"{food}의 맵기 정도: {selected_spicy_level}")
+
+if __name__ == "__main__":
+    main()
+
+
+# 음식 값 임력시 달러로 환전하여 가격 제공
+def image_to_text(image):
+    text = pytesseract.image_to_string(image)
+    return text
+
+def convert_to_usd(krw_amount, exchange_rate):
+    return krw_amount / exchange_rate
+
+def main():
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.title("Price info")
+    st.write(" ")
+    
+    # 환율 가격 설정 (1달러가 1100원이라 설정)
+    exchange_rate = 1100
+    
+    krw_amount = st.number_input("한국 가격 (KRW)", min_value=0.0)
+    
+    # 달러로 환전된 가격을 계산
+    usd_amount = convert_to_usd(krw_amount, exchange_rate)
+    st.write(f"달러로 환전된 가격 (USD): {usd_amount:.2f}")
+
+# 상단으로 이동하는 버튼 (수정예정)
+    # 가로선 추가
+    st.markdown("<hr>", unsafe_allow_html=True)
+    st.title("버튼으로 제일 상단으로 스크롤하기")
+    
+    # 'Scroll to Top' 버튼을 생성
+    if st.button("Go to Top"):
+        # 'Scroll to Top' 버튼이 클릭되면 JavaScript 코드를 실행하여 제일 상단으로 스크롤
+        st.write('<script>window.scrollTo(0,0);</script>', unsafe_allow_html=True)
+
+    st.write("내용 추가 예정")
+
+if __name__ == "__main__":
+    main()
