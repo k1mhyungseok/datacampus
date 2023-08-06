@@ -1,5 +1,4 @@
-from PIL import Image
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 import os
 import cv2 as cv
 import easyocr
