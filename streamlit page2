@@ -100,7 +100,7 @@ def main():
     st.title("Price info")
     st.write(" ")
     
-    # 환율 가격 설정 (1달러가 1100원이라 설정)
+    # 환율 가격 설정 (1달러가 1100원이라 설정, 실시간 환율 불러오는 API 활용 예정)
     exchange_rate = 1100
     
     krw_amount = st.number_input("한국 가격 (KRW)", min_value=0.0)
