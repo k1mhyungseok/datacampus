@@ -1,0 +1,70 @@
+import streamlit as st
+import time
+
+#오른쪽 상단에 로고 (텍스트) 삽입
+def main():
+    logo_text = "YUMSCAN"
+    logo_html = f"""
+    <div style="position: absolute; top: -50px; right: -200px;">
+        <h1 style="font-size: 24px;">{logo_text}</h1>
+    </div>
+    """
+    st.markdown(logo_html, unsafe_allow_html=True)
+
+    st.title('K-FOOD : From Seoul to your soul.') # 슬로건
+
+    st.markdown("<style>h1{margin-bottom: 10px;}</style>", unsafe_allow_html=True)
+
+#언어를 선택할 수 있도록 하는 select box
+    option = st.selectbox(
+        'Preferred languages',
+        ('English', 'Chinese', 'Japanese'))
+    st.write('You selected:', option) #어떤 언어를 선택했는지 확인 메시지 출력
+
+    st.markdown("<style>.css-1aumxhk{margin-top: 100px;}</style>", unsafe_allow_html=True)
+
+    if "photo" not in st.session_state:
+        st.session_state["photo"] = "not done"
+
+    col1, col2 = st.columns([5, 3])
+
+    def change_photo_state():
+        st.session_state["photo"] = "done"
+
+#사진 업로드, 사진을 직접 촬영하는 모듈
+    uploaded_photo = col1.file_uploader("Upload a photo", on_change=change_photo_state)
+    camera_photo = col1.camera_input("Take a photo", on_change=change_photo_state)
+
+    if st.session_state["photo"] == "done":
+        progress_bar = col1.progress(0)
+
+        for perc_completed in range(100):
+            time.sleep(0.05)
+            progress_bar.progress(perc_completed + 1)
+
+#사진 업로드 성공 메시지 출력
+        col1.success("Photo uploaded successfully!")
+
+    if st.session_state["photo"] == "done" and col1.button("Submit"):
+        with st.expander("Preview"):
+            st.write("Please double-check that you have submitted all desired photo")
+
+            if uploaded_photo is None:
+                st.image(camera_photo)
+            else:
+                st.image(uploaded_photo)
+#간단한 사용법 정리
+    col2.markdown("""
+        <div style="border: 1px solid black; padding: 10px;">
+            <h2>Instructions</h2>
+            <p>Welcome to K-FOOD's YUMSCAN!</p>
+            <p>1. Use the dropdown to select your preferred language.</p>
+            <p>2. You can either upload a photo by clicking 'Upload a photo' or take a photo using the 'Take a photo' button.</p>
+            <p>3. Click the 'Submit' button after uploading or taking a photo to view the preview.</p>
+            <p>4. Double-check your photo in the preview section before submitting.</p>
+            <p>5. Enjoy the app and discover the delicious world of K-FOOD!</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
