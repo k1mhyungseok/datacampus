@@ -1,9 +1,12 @@
 #메뉴판의 음식 이름을 인식하고 버튼 혹은 체크박스를 활용해 사용자가 정보를 확인하고 싶은 메뉴를 선택할 수 있는 UI 제공
 #streamlit을 활용하여 구현했으며, 버튼/체크박스 중 하나의 형식을 선택할 예정
+
 import streamlit as st
 import numpy as np
 import pandas as pd
 
+#버튼을 누르면(true가 전달되면) 하위의 col1,col2가 출력
+#다음 버튼을 누르면 기존에 열려있던 버튼의 정보는 자동으로 닫힘
 if st.button('삽겹살'):
     col1, col2 = st.columns([1,1])
 

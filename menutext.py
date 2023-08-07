@@ -8,8 +8,9 @@ import easyocr
 import numpy as np
 import pandas as pd
 import re
-from hanspell import spell_checker
+from hanspell import spell_checker  ##맞춤법 수정 모듈hanspell
 
+#특수문자, 숫자 등을 제거하고 re_text에 저장하는 함수
 def clean_text(inputString):
   re_text = re.sub(r'[0-9\.,\s,A-Z,a-z,-=+,#/\?:^.@*\"※~ㆍ!』‘|\(\)\[\]`\'…》\”\“\’·,{}]', ' ', inputString)
   return re_text
@@ -22,15 +23,18 @@ while(1):
     reader = easyocr.Reader(['ko'], gpu=False)
     result = reader.readtext(route)
     
+    #결과를 문자열로 바꾸고 join 함수를 사용해 메뉴 이름을 띄어쓰기로 연결
     df = pd.DataFrame(result)
     text = df[1]
     MenuName = np.array(text)
     MenuName = ' '.join(MenuName)
     MenuName
 
+    #특수문자, 숫자 제거
     re_name = clean_text(MenuName)
     re_name = ' '.join(re_name.split())
     
+    #hanspell 활용, but 정확도 높지 않음
     spelled = spell_checker.check(re_name)
     checked_sent = spelled.checked
     print(checked_sent)

@@ -8,6 +8,7 @@
         <meta charset = "utf-8">
         <title> image upload </title>
         <body>
+            <!-- 텍스트 정렬은 가운데로, 텍스트는 'let me see'로 설정 -->
             <div style="text-align: center;">
                 <h2>Let me See</h2>
             </div>
@@ -15,11 +16,13 @@
             <form method="post" enctype="multipart/form-data">
                 <div class="button">
                     <label for="chooseFile">
+                        <!-- 텍스트는 아래와 같이 설정, 이걸 누르면 사진 올릴 수 있는 새로운 창이 보임 -->
                         👉 CLICK HERE! 👈
                     </label>
                 </div>
                 <input type="file" id="chooseFile" name="chooseFile" accept="image/*" onchange="loadFile(this)">
             </form>
+            <!-- 텍스트 정렬은 가운데로, 텍스트는 '사진업로드'로 설정 -->
             <div style="text-align: center;">
                 <button class="browse-btn">사진업로드</botton>
             </div>
