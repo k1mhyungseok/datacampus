@@ -57,69 +57,148 @@ def main():
     with cols[1]:
         st.write(allergy_data["description"])
 
-# Spicy-Level (수정예정)
+if __name__ == "__main__":
+    main()
 
-    # 가로선 추가
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.title("Spicy-Level")
-    
-    # 음식별 맵기 정도를 정의
-    spicy_levels = {
-        "김치찌개": 3,
-        "떡볶이": 2,
-        "피자": 1,
-        "샐러드": 0,
+# Spicy-level (NULL 수정완료)
+st.title("음식의 맵기 단계")
+
+# 각 음식의 기본 맵기 단계 설정
+spiciness_levels = {
+    "파스타": 1,
+    "피자": 2,
+    "치킨": 3,
+    "콜라": 0,
+    "치즈": None
+}
+
+# 음식 목록 생성
+foods = list(spiciness_levels.keys())
+
+# 음식 선택
+selected_food = st.selectbox("음식 선택", foods)
+
+# null 값을 선택한 경우
+if selected_food == "치즈":
+    is_null = st.write("UNKNOWN")
+    if is_null:
+        spicy_level = None
+    else:
+        # "치즈"인 경우 슬라이더바를 비활성화하고 불투명하게 표시
+        with st.empty():
+            spicy_level = None
+else:
+    spicy_level = st.slider("맵기 단계", min_value=0, max_value=3, value=spiciness_levels[selected_food], step=1, format="🌶️ %d")
+
+# 선택된 맵기 단계와 null 여부에 따라 결과 출력
+if spicy_level is None:
+    st.write(f"{selected_food}의 맵기 단계: Null")
+else:
+    st.write(f"{selected_food}의 맵기 단계:", spicy_level)
+
+
+# 환율 정보 (실시간 환율 정보를 사용)
+import requests
+
+def get_exchange_rates(api_key):
+    url = f"https://api.currencyfreaks.com/latest?apikey=21a31a1e5b4346b3877828cea5953658"
+    headers = {
+        "apikey": api_key
     }
-    
-    # 음식 선택
-    food = st.selectbox("음식 선택", ["김치찌개", "떡볶이", "피자", "샐러드"])
-    
-    # 선택한 음식의 맵기 정도를 슬라이더로 조절할 수 있도록 구현
-    selected_spicy_level = st.slider("맵기 정도 선택", min_value=0, max_value=3, value=spicy_levels[food])
-    
-    # 선택한 음식의 맵기 정도를 업데이트
-    spicy_levels[food] = selected_spicy_level
-    
-    # 선택한 음식과 맵기 정도를 출력
-    st.write(f"{food}의 맵기 정도: {selected_spicy_level}")
+    response = requests.get(url, headers=headers)
+    data = response.json()
+    return data["rates"]
 
-if __name__ == "__main__":
-    main()
+base_currency = "USD"  # 기준 화폐
+target_currencies = ["USD", "JPY", "CNY", "TWD"]  # 대상 화폐들
+api_key = "21a31a1e5b4346b3877828cea5953658"  # currencyfreaks에서 발급받은 API 키를 입력
 
+exchange_rates = get_exchange_rates(api_key)
 
-# 음식 값 임력시 달러로 환전하여 가격 제공
-def image_to_text(image):
-    text = pytesseract.image_to_string(image)
-    return text
+# 환율 정보를 확인
+print(exchange_rates)
 
-def convert_to_usd(krw_amount, exchange_rate):
-    return krw_amount / exchange_rate
+krw_exchange_rate = exchange_rates.get("KRW")
+jpy_exchange_rate = exchange_rates.get("JPY")
+cny_exchange_rate = exchange_rates.get("CNY")
+twd_exchange_rate = exchange_rates.get("TWD")
 
-def main():
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.title("Price info")
-    st.write(" ")
-    
-    # 환율 가격 설정 (1달러가 1100원이라 설정, 실시간 환율 불러오는 API 활용 예정)
-    exchange_rate = 1100
-    
-    krw_amount = st.number_input("한국 가격 (KRW)", min_value=0.0)
-    
-    # 달러로 환전된 가격을 계산
-    usd_amount = convert_to_usd(krw_amount, exchange_rate)
-    st.write(f"달러로 환전된 가격 (USD): {usd_amount:.2f}")
+exchange = {
+    "KRW": krw_exchange_rate,  
+    "JPY": jpy_exchange_rate,   
+    "CNY": cny_exchange_rate,   
+    "TWD": twd_exchange_rate    
+}
 
-# 상단으로 이동하는 버튼 (수정예정)
-    # 가로선 추가
-    st.markdown("<hr>", unsafe_allow_html=True)
-    st.title("버튼으로 제일 상단으로 스크롤하기")
-    
-    # 'Scroll to Top' 버튼을 생성
-    if st.button("Go to Top"):
-        # 'Scroll to Top' 버튼이 클릭되면 JavaScript 코드를 실행하여 제일 상단으로 스크롤
-        st.write('<script>window.scrollTo(0,0);</script>', unsafe_allow_html=True)
+# 가로선 추가
+st.markdown("<hr>", unsafe_allow_html=True)
 
-    st.write("내용 추가 예정")
+st.title("Today's Exchange Rate")
 
-if __name__ == "__main__":
-    main()
+BASE_currency = "KRW"
+krw_exchange_rate = float(krw_exchange_rate)
+jpy_exchange_rate = float(jpy_exchange_rate)
+cny_exchange_rate = float(cny_exchange_rate)
+twd_exchange_rate = float(twd_exchange_rate)
+
+usd_exchange_rate = exchange_rates.get("USD")
+usd_exchange_rate = float(usd_exchange_rate)
+USD_currency = usd_exchange_rate/krw_exchange_rate
+
+if USD_currency is not None:
+    USD_currency = float(USD_currency)
+      # 문자열을 실수형으로 변환
+    st.write(f"1 {BASE_currency} = {USD_currency:.4f} USD")
+else:
+    st.write("USD의 환율 정보가 없습니다.")
+
+JPY_currency = jpy_exchange_rate/krw_exchange_rate
+
+if JPY_currency is not None:
+    JPY_currency = float(JPY_currency)
+      # 문자열을 실수형으로 변환
+    st.write(f"1 {BASE_currency} = {JPY_currency:.4f} JPY")
+else:
+    st.write("JPY의 환율 정보가 없습니다.")
+
+CNY_currency = cny_exchange_rate/krw_exchange_rate
+
+if CNY_currency is not None:
+    CNY_currency = float(CNY_currency)
+      # 문자열을 실수형으로 변환
+    st.write(f"1 {BASE_currency} = {CNY_currency:.4f} CNY")
+else:
+    st.write("CNY의 환율 정보가 없습니다.")
+
+TWD_currency = twd_exchange_rate/krw_exchange_rate
+
+if TWD_currency is not None:
+    TWD_currency = float(TWD_currency)
+      # 문자열을 실수형으로 변환
+    st.write(f"1 {BASE_currency} = {TWD_currency:.4f} TWD")
+else:
+    st.write("TWD의 환율 정보가 없습니다.")
+
+# 가로선 추가
+st.markdown("<hr>", unsafe_allow_html=True)
+
+st.title("Price info - 실시간 환율 정보 사용 (KRW 기준)")
+
+EXCHANGE = {
+    "USD": USD_currency,  
+    "JPY": JPY_currency,   
+    "CNY": CNY_currency,   
+    "TWD": TWD_currency   
+}
+
+BASE_currency = "KRW"
+target_currencies = ["USD", "JPY", "CNY", "TWD"]
+
+st.write("BASE_currency:", BASE_currency)
+BASE = st.number_input("enter price", key="BASE", min_value=0.01)
+
+st.write("choose target_currencies:")
+TARGET = st.selectbox("select currency", target_currencies, key="TARGET")
+
+converted_amount = BASE * EXCHANGE[TARGET]
+st.write(f"{BASE:.2f} {BASE_currency} = {converted_amount:.2f} {TARGET}")
