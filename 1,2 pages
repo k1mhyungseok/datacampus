@@ -1,17 +1,19 @@
 import streamlit as st
 import requests
 import time
+from PIL import Image
 
 def home_page():
-    logo_text = "YUMSCAN"
+    logo_text = " "
     logo_html = f"""
-    <div style="position: absolute; top: -50px; right: -150px;">
+    <div style="position: absolute; top: -50px; right: -100px;">
         <h1 style="font-size: 24px;">{logo_text}</h1>
     </div>
     """
     st.markdown(logo_html, unsafe_allow_html=True)
-
-    st.title('K-FOOD : From Seoul to your soul.')
+    image = Image.open('logowbg.png')
+    st.title('YUMSCAN')
+    st.header('K-FOOD : From Seoul to your soul.')
 
     st.markdown("<style>h1{margin-bottom: 10px;}</style>", unsafe_allow_html=True)
 
@@ -109,7 +111,6 @@ def allergen_page():
 
 def spiciness_page():
     st.title("Spiciness Level")
-    st.title("음식의 맵기 단계")
 
 # 각 음식의 기본 맵기 단계 설정
     spiciness_levels = {
@@ -179,7 +180,7 @@ def exchange_rate_page():
     # 가로선 추가
     #st.markdown("<hr>", unsafe_allow_html=True)
 
-    st.title("Today's Exchange Rate")
+    st.header("Today's Exchange Rate")
 
     BASE_currency = "KRW"
     krw_exchange_rate = float(krw_exchange_rate)
@@ -194,7 +195,7 @@ def exchange_rate_page():
     if USD_currency is not None:
         USD_currency = float(USD_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1 {BASE_currency} = {USD_currency:.4f} USD")
+        st.write(f"1000 {BASE_currency} = :blue[{USD_currency*1000:.4f} USD]")
     else:
         st.write("USD의 환율 정보가 없습니다.")
 
@@ -203,7 +204,7 @@ def exchange_rate_page():
     if JPY_currency is not None:
         JPY_currency = float(JPY_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1 {BASE_currency} = {JPY_currency:.4f} JPY")
+        st.write(f"1000 {BASE_currency} = :blue[{JPY_currency*1000:.4f} JPY]")
     else:
         st.write("JPY의 환율 정보가 없습니다.")
 
@@ -212,7 +213,7 @@ def exchange_rate_page():
     if CNY_currency is not None:
         CNY_currency = float(CNY_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1 {BASE_currency} = {CNY_currency:.4f} CNY")
+        st.write(f"1000 {BASE_currency} = :blue[{CNY_currency*1000:.4f} CNY]")
     else:
         st.write("CNY의 환율 정보가 없습니다.")
 
@@ -221,14 +222,15 @@ def exchange_rate_page():
     if TWD_currency is not None:
         TWD_currency = float(TWD_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1 {BASE_currency} = {TWD_currency:.4f} TWD")
+        st.write(f"1000 {BASE_currency} = :blue[{TWD_currency*1000:.4f} TWD]")
     else:
         st.write("TWD의 환율 정보가 없습니다.")
 
     # 가로선 추가
     st.markdown("<hr>", unsafe_allow_html=True)
 
-    st.title("Price info - 실시간 환율 정보 사용 (KRW 기준)")
+    st.title("Currency Converter")
+    st.write("From:", BASE_currency)
 
     EXCHANGE = {
         "USD": USD_currency,  
@@ -240,22 +242,23 @@ def exchange_rate_page():
     BASE_currency = "KRW"
     target_currencies = ["USD", "JPY", "CNY", "TWD"]
 
-    st.write("BASE_currency:", BASE_currency)
-    BASE = st.number_input("enter price", key="BASE", min_value=0.01)
+    BASE = st.number_input("AMOUNT", key="BASE", min_value=0.01)
 
-    st.write("choose target_currencies:")
-    TARGET = st.selectbox("select currency", target_currencies, key="TARGET")
+    #st.write("choose target_currencies:")
+    TARGET = st.selectbox("TO", target_currencies, key="TARGET")
 
     converted_amount = BASE * EXCHANGE[TARGET]
-    st.write(f"{BASE:.2f} {BASE_currency} = {converted_amount:.2f} {TARGET}")
-
+    st.title(f"{BASE:.2f} {BASE_currency} = :blue[{converted_amount:.2f} {TARGET}]")
 
 # Main app
 def main():
     st.set_page_config(page_title="YumScan", page_icon=":pizza:", layout="wide")
     
     # Create a sidebar navigation menu
-    navigation = st.sidebar.radio("YUMSCAN", ["🏠 Home", "🍔 Food Information", "🥗 Ingredients", "🚫 Allergen Information", "🌶️ Spiciness Level", "💱 Exchange Rates"], key="navigation")
+    image = Image.open('logowbg.png')
+
+    st.sidebar.image("logowbg.png", use_column_width=True)
+    navigation = st.sidebar.radio("YUMSCAN", ["🏠 Home", "🍔 Food Information", "🥗 Ingredients", "🚫 Allergen Information", "🌶️ Spiciness Level", "💱 Currency Converter"], key="navigation")
     
     # Separator line
     st.sidebar.markdown("<div class='sidebar-separator'></div>", unsafe_allow_html=True)
@@ -273,8 +276,21 @@ def main():
         allergen_page()
     elif navigation == "🌶️ Spiciness Level":
         spiciness_page()
-    elif navigation == "💱 Exchange Rates":
+    elif navigation == "💱 Currency Converter":
         exchange_rate_page()
 
 if __name__ == "__main__":
     main()
+
+# Made with Streamlit, MainMenu 제거
+st.markdown('''
+    <style>
+        #MainMenu {
+            visibility: hidden;
+        }
+        
+        footer {
+            visibility: hidden;
+        }    
+    </style>
+    ''', unsafe_allow_html=True)  
