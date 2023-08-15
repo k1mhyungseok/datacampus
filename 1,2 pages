@@ -65,6 +65,41 @@ def food_info_page():
     st.markdown("<p style='font-size: 25px;'>2.pasta</p>", unsafe_allow_html=True)
     st.markdown("<p style='font-size: 25px;'>3.coke</p>", unsafe_allow_html=True)
 
+def preprocess_sublist(df, col_name):
+    import numpy as np
+    stopword = ["'", '[', ']', ' ']
+    sub_list = []
+    for i in df[col_name]:
+        word = ''
+        for k in i:
+            if k not in stopword:
+                word += k
+        sub_list.append(word.split(sep=','))
+
+    res = []
+    for i in range(len(df)):
+        if len(sub_list[i][0]) == 0:
+            res.append(np.nan)
+        else:
+            res.append(sub_list[i])
+
+    df[col_name] = res
+    
+    return None
+
+def read_db(path):
+    import pandas as pd
+    df = pd.read_csv(path, sep = '|', header = 0).iloc[:, 1:]
+    col_list = df.columns[8:14].values
+    for i in col_list:
+        preprocess_sublist(df, i)
+    
+    return df
+    
+df = read_db('db_v4.csv') # db 폴더 경로 지정 필요!
+
+
+
 def Ingredients():
 # 음식에 들어있는 재료에 대한 사진과 설명 
     st.title("Ingredients")
@@ -271,7 +306,7 @@ def main():
     elif navigation == "🍔 Food Information":
         food_info_page()
     elif navigation == "🥗 Ingredients":
-        Ingredients()
+        Ingredients(selected_language)
     elif navigation == "🚫 Allergen Information":
         allergen_page()
     elif navigation == "🌶️ Spiciness Level":
