@@ -85,50 +85,46 @@ def food_info_page(foods, df=df, img_path = food_img_path):
                 break
         
 
-def Ingredients(selected_food):
+def Ingredients(selected_food, selected_language = 'description.ko'):
 # 음식에 들어있는 재료에 대한 사진과 설명 
     st.title("Ingredients")
     st.markdown("<p style='font-size: 20px;'>The ingredients in this food are as follows.</p>", unsafe_allow_html=True)
     st.write(" ")
-    img_path = ingredient_img_path
-    # ac.save_image(selected_food, df, 'ingredients.ko', img_path)
+    info = '식재료'
 
-    # # 첫 번째 재료 정보 (이미지와 설명)
+    if selected_language == 'English': language = 'description.en'
+    elif selected_language == 'Japanese': language = 'description.ja'
+    elif selected_language == 'Chinese': language = 'description.zh_CN'
+    elif selected_language == 'Taiwan': language = 'description.zh_TW'
 
-    
-    # with cols[0]:
-    #     st.image("vegetable.png", use_column_width=True)
-    #     st.write("첫 번째 재료 설명")
-    
-    # # 두 번째 재료 정보 (이미지와 설명)
-    # with cols[1]:
-    #     st.image("vegetable.png", use_column_width=True)
-    #     st.write("두 번째 재료 설명")
+    ingredient_data = ac.db_finder(selected_food, info, df=df)
 
-    # # 세 번째 재료 정보 (이미지와 설명)
-    # with cols[2]:
-    #     st.image("vegetable.png", use_column_width=True)
-    #     st.write("세 번째 재료 설명")
+    cols = st.columns(len(ingredient_data[language]))
+
+    for i in range(len(ingredient_data[language])):
+        with cols[i]:
+            st.image(ingredient_data['image'][i], width=200)
+            st.write(ingredient_data[language][i])
 
 
-def allergen_page(selected_food, selected_language):
+def allergen_page(selected_food):
     st.title("Allergen Information")
     st.markdown("<p style='font-size: 20px;'>This food can cause the following allergies.</p>", unsafe_allow_html=True)
     st.write(" ")
     st.write(" ")
 
-    info = '알러지ko' #en 지원 안됨
+    info = '알러지' #en 지원 안됨
 
     
     # 알러지에 대한 사진과 설명
     allergy_data = ac.db_finder(selected_food, info, df)
 
-    cols = st.columns(len(allergy_data['description']))
+    cols = st.columns(len(allergy_data['description.ko']))
 
-    for i in range(len(allergy_data['description'])):
+    for i in range(len(allergy_data['description.ko'])):
         with cols[i]:
             st.image(allergy_data['image'][i], width=200)
-            st.write(allergy_data["description"][i])
+            st.write(allergy_data["description.ko"][i])
 
 def spiciness_page(selected_food):
     st.title("Spiciness Level")
@@ -284,15 +280,14 @@ def main():
  
     # 음식 선택
     selected_food = st.selectbox("음식 선택", foods)
-    
-    
+    ac.save_image(foods, col = 'ingredients.ko', df=df, img_path=ingredient_img_path)
+    ac.save_image(foods, col = 'ko', df=df, img_path=food_img_path)
     if navigation == "🏠 Home":
         home_page()
     elif navigation == "🍔 Food Information":
-        ac.save_image(foods, 'ko',df=df, img_path=food_img_path)
         food_info_page(foods)
     elif navigation == "🥗 Ingredients":
-        Ingredients(selected_food)
+        Ingredients(selected_food, selected_language)
     elif navigation == "🚫 Allergen Information":
         allergen_page(selected_food, selected_language)
     elif navigation == "🌶️ Spiciness Level":

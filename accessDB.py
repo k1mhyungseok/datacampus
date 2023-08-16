@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import os
-import csv
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -43,13 +42,26 @@ def find_image(img_path, target):
 
 ### 사용법 df_finder('음식명', '원하는 정보', db 저장한 객체명)
 def db_finder(food_name, info, df):
-    if info == '알러지ko': # 알러지 한국어.ver
+    if info == '알러지': # 알러지 한국어.ver
         allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
         allergy_data ={
             'image' : ["allergy_image/{}_image.jpg".format(x) for x in allergy_list],
-            'description' : allergy_list #리스트
+            'description.ko' : allergy_list,
+            'description.en' : [y for x in df.loc[(df['ko'] == food_name)]['allergy.en'] for y in x]
         }
         return allergy_data
+    
+    elif info == '식재료':
+        ingredient_list = [y for x in df.loc[(df['ko'] == food_name)]['ingredients.ko'] for y in x]
+        ingredient_data = {
+            "image" : ['ingredient_image/{}_image.jpg'.format(x) for x in ingredient_list],
+            'description.ko' : ingredient_list,
+            'description.en' : [y for x in df.loc[(df['ko'] == food_name)]['ingredients.en'] for y in x],
+            'description.ja' : [y for x in df.loc[(df['ko'] == food_name)]['ingredients.ja'] for y in x],
+            'description.zh_CN' : [y for x in df.loc[(df['ko'] == food_name)]['ingredients.zh_CN'] for y in x],
+            'description.zh_TW' : [y for x in df.loc[(df['ko'] == food_name)]['ingredients.zh_TW'] for y in x]
+        }
+        return ingredient_data
 
     # elif info == '알러지en': # 알러지 영어.ver
     #     allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
@@ -60,17 +72,26 @@ def db_finder(food_name, info, df):
     #     }
     #     return allergy_data
     
-           
+
 
 def save_image(food_name, col, df, img_path):
-    search_terms = [df.loc[df['ko']==x]['ko'].values[0] for x in food_name]
-    url_format = "https://www.google.com/search?q={}&tbm=isch"
+            
+    if col == 'ko':
+        search_terms = [df.loc[df['ko']==x][col].values[0] for x in food_name]
+    else:
+        search_terms = []
+        for i in df.loc[df['ko'].isin(food_name)][col].values:
+            for j in i:
+                search_terms.append(j) 
 
     if not os.path.exists(img_path):
         os.makedirs(img_path)
     else:
         for f in os.listdir(img_path):
             os.remove(os.path.join(img_path, f))
+
+    url_format = "https://www.google.com/search?q={}&tbm=isch"
+
 
     for term in search_terms:
         search_url = url_format.format(term)
