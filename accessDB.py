@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 import os
+import csv
+import requests
+import re
+from bs4 import BeautifulSoup
 
 
 # ingredient 변수의 원소값들을 str -> list로 변환
@@ -47,17 +51,54 @@ def db_finder(food_name, info, df):
         }
         return allergy_data
 
-    elif info == '알러지en': # 알러지 영어.ver
-        allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
-        allergy_data ={
-            'image' : ["allergy_image/{}_image.jpg".format(x) for x in allergy_list],
-            'description' : [y for x in df.loc[(df['ko'] == food_name)]['allergy.en'] for y in x]
-        }
-        return allergy_data
+    # elif info == '알러지en': # 알러지 영어.ver
+    #     allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
         
-    # elif info == 
+    #     allergy_data ={
+    #         'image' : ["allergy_image/{}_image.jpg".format(x) for x in allergy_list],
+    #         'description' : [y for x in df.loc[(df['ko'] == food_name)]['allergy.en'] for y in x]
+    #     }
+    #     return allergy_data
+    
+           
 
+def save_image(food_name, col, df, img_path):
+    search_terms = [df.loc[df['ko']==x]['ko'].values[0] for x in food_name]
+    url_format = "https://www.google.com/search?q={}&tbm=isch"
 
+    if not os.path.exists(img_path):
+        os.makedirs(img_path)
+    else:
+        for f in os.listdir(img_path):
+            os.remove(os.path.join(img_path, f))
+
+    for term in search_terms:
+        search_url = url_format.format(term)
+        response = requests.get(search_url)
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        image_links = soup.find_all("img")
+
+        for img in image_links:
+            image_url = img.get("src")
+
+            if image_url and not image_url.startswith("data:"):
+                if not image_url.startswith("http"):
+                    image_url = search_url + image_url
+                image_data = requests.get(image_url).content
+                image_extension_match = re.search(r"/([a-zA-Z0-9_.-]+)$", image_url)
+                if image_extension_match:
+                    image_extension = image_extension_match.group(1)
+                else:
+                    image_extension = "jpg"
+
+                if image_extension.lower() == "jpg":
+                    image_filename = f"{img_path}/{term}_image.{image_extension}"
+
+                    with open(image_filename, "wb") as image_file:
+                        image_file.write(image_data)
+                    break
+                    
 
 
 

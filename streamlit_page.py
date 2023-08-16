@@ -3,12 +3,13 @@ import requests
 import time
 from PIL import Image
 import accessDB as ac
+import pandas as pd
 
 db_path = 'db_v5.csv'
-df = ac.read_db(db_path)
 allergy_img_path = 'allergy_image'
-ingredient_img_path = 'ingredient_img'
-food_img_path = 'food_img'
+ingredient_img_path = 'ingredient_image'
+food_img_path = 'food_image'
+df = ac.read_db(db_path)
 
 def home_page():
     logo_text = " "
@@ -66,37 +67,48 @@ def home_page():
         </div>
     """, unsafe_allow_html=True)
 
-def food_info_page(selected_food):
+def food_info_page(foods, df=df, img_path = food_img_path):
     st.title("Choose the food you want to get information")
-    st.markdown("<p style='font-size: 25px;'>1.pizza</p>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 25px;'>2.pasta</p>", unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 25px;'>3.coke</p>", unsafe_allow_html=True)
+    selected_food = st.radio("Select a food item", foods)
 
+    if st.button("Submit"):
+        for item in foods: 
+            if selected_food == item: # 사용자가 고른 메뉴랑 지금 참조중인 메뉴명이 같으면
+                st.write("About {}".format(item)) # 참조중인 메뉴명 출력
+                st.dataframe(
+                    pd.DataFrame({'Language' : ['Korean', 'English', '汉语', '台湾'],
+                                  'Translate' : [df.loc[(df['ko']==item)]['ko'].values[0],
+                                                df.loc[(df['ko']==item)]['en'].values[0],
+                                                df.loc[(df['ko']==item)]['zh_CN'].values[0],
+                                                df.loc[(df['ko']==item)]['zh_TW'].values[0]]}).set_index('Language'))
+                st.image(r'{0}/{1}_image.jpg'.format(img_path, str(item))) # 참조중인 메뉴 사진 출력
+                break
+        
 
 def Ingredients(selected_food):
 # 음식에 들어있는 재료에 대한 사진과 설명 
     st.title("Ingredients")
     st.markdown("<p style='font-size: 20px;'>The ingredients in this food are as follows.</p>", unsafe_allow_html=True)
     st.write(" ")
+    img_path = ingredient_img_path
+    # ac.save_image(selected_food, df, 'ingredients.ko', img_path)
 
-    cols = st.columns(3)
-
-    # 첫 번째 재료 정보 (이미지와 설명)
+    # # 첫 번째 재료 정보 (이미지와 설명)
 
     
-    with cols[0]:
-        st.image("vegetable.png", use_column_width=True)
-        st.write("첫 번째 재료 설명")
+    # with cols[0]:
+    #     st.image("vegetable.png", use_column_width=True)
+    #     st.write("첫 번째 재료 설명")
     
-    # 두 번째 재료 정보 (이미지와 설명)
-    with cols[1]:
-        st.image("vegetable.png", use_column_width=True)
-        st.write("두 번째 재료 설명")
+    # # 두 번째 재료 정보 (이미지와 설명)
+    # with cols[1]:
+    #     st.image("vegetable.png", use_column_width=True)
+    #     st.write("두 번째 재료 설명")
 
-    # 세 번째 재료 정보 (이미지와 설명)
-    with cols[2]:
-        st.image("vegetable.png", use_column_width=True)
-        st.write("세 번째 재료 설명")
+    # # 세 번째 재료 정보 (이미지와 설명)
+    # with cols[2]:
+    #     st.image("vegetable.png", use_column_width=True)
+    #     st.write("세 번째 재료 설명")
 
 
 def allergen_page(selected_food, selected_language):
@@ -269,13 +281,16 @@ def main():
     # 음식 목록 생성
     foods = ['치즈퐁듀랍스터&씨푸드', '스모크우드박스안심스테이크'] # 은지네에서 받은 ocr 결과 리스트로 수정
 
+ 
     # 음식 선택
     selected_food = st.selectbox("음식 선택", foods)
+    
     
     if navigation == "🏠 Home":
         home_page()
     elif navigation == "🍔 Food Information":
-        food_info_page(selected_food)
+        ac.save_image(foods, 'ko',df=df, img_path=food_img_path)
+        food_info_page(foods)
     elif navigation == "🥗 Ingredients":
         Ingredients(selected_food)
     elif navigation == "🚫 Allergen Information":
