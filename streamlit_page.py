@@ -2,6 +2,13 @@ import streamlit as st
 import requests
 import time
 from PIL import Image
+import accessDB as ac
+
+db_path = 'db_v5.csv'
+df = ac.read_db(db_path)
+allergy_img_path = 'allergy_image'
+ingredient_img_path = 'ingredient_img'
+food_img_path = 'food_img'
 
 def home_page():
     logo_text = " "
@@ -59,48 +66,14 @@ def home_page():
         </div>
     """, unsafe_allow_html=True)
 
-def food_info_page():
+def food_info_page(selected_food):
     st.title("Choose the food you want to get information")
     st.markdown("<p style='font-size: 25px;'>1.pizza</p>", unsafe_allow_html=True)
     st.markdown("<p style='font-size: 25px;'>2.pasta</p>", unsafe_allow_html=True)
     st.markdown("<p style='font-size: 25px;'>3.coke</p>", unsafe_allow_html=True)
 
-def preprocess_sublist(df, col_name):
-    import numpy as np
-    stopword = ["'", '[', ']', ' ']
-    sub_list = []
-    for i in df[col_name]:
-        word = ''
-        for k in i:
-            if k not in stopword:
-                word += k
-        sub_list.append(word.split(sep=','))
 
-    res = []
-    for i in range(len(df)):
-        if len(sub_list[i][0]) == 0:
-            res.append(np.nan)
-        else:
-            res.append(sub_list[i])
-
-    df[col_name] = res
-    
-    return None
-
-def read_db(path):
-    import pandas as pd
-    df = pd.read_csv(path, sep = '|', header = 0).iloc[:, 1:]
-    col_list = df.columns[8:14].values
-    for i in col_list:
-        preprocess_sublist(df, i)
-    
-    return df
-    
-df = read_db('db_v4.csv') # db 폴더 경로 지정 필요!
-
-
-
-def Ingredients():
+def Ingredients(selected_food):
 # 음식에 들어있는 재료에 대한 사진과 설명 
     st.title("Ingredients")
     st.markdown("<p style='font-size: 20px;'>The ingredients in this food are as follows.</p>", unsafe_allow_html=True)
@@ -109,6 +82,8 @@ def Ingredients():
     cols = st.columns(3)
 
     # 첫 번째 재료 정보 (이미지와 설명)
+
+    
     with cols[0]:
         st.image("vegetable.png", use_column_width=True)
         st.write("첫 번째 재료 설명")
@@ -124,61 +99,50 @@ def Ingredients():
         st.write("세 번째 재료 설명")
 
 
-def allergen_page():
+def allergen_page(selected_food, selected_language):
     st.title("Allergen Information")
     st.markdown("<p style='font-size: 20px;'>This food can cause the following allergies.</p>", unsafe_allow_html=True)
     st.write(" ")
     st.write(" ")
 
+    info = '알러지ko'
+    
     # 알러지에 대한 사진과 설명
-    allergy_data = {
-        "image": "vegetable.png",
-        "description": "알러지에 대한 설명입니다."
-    }
+    allergy_data = ac.db_finder(selected_food, info, df)
 
-    cols = st.columns(2)
+    cols = st.columns(len(allergy_data['description']))
 
-    with cols[0]:
-        st.image(allergy_data["image"], width=200)
+    for i in range(len(allergy_data['description'])):
+        with cols[i]:
+            st.image(allergy_data['image'][i], width=200)
+            st.write(allergy_data["description"][i])
 
-    with cols[1]:
-        st.write(allergy_data["description"])
-
-def spiciness_page():
+def spiciness_page(selected_food):
     st.title("Spiciness Level")
 
-# 각 음식의 기본 맵기 단계 설정
-    spiciness_levels = {
-        "파스타": 1,
-        "피자": 2,
-        "치킨": 3,
-        "콜라": 0,
-        "치즈": None
-    }
+    # info = '맵기단계'
+    # ac.db_finder(selected_food, info, df)
 
-    # 음식 목록 생성
-    foods = list(spiciness_levels.keys())
+    # # null 값을 선택한 경우
+    # if selected_food == "치즈":
+    #     is_null = st.write("UNKNOWN")
+    #     if is_null:
+    #         spicy_level = None
+    #     else:
+    #     # "치즈"인 경우 슬라이더바를 비활성화하고 불투명하게 표시
+    #         with st.empty():
+    #             spicy_level = None
+    # else:
+    #     spicy_level = st.slider("맵기 단계", 
+    #                             min_value=0, max_value=3, 
+    #                             value=spiciness_levels[selected_food], 
+    #                             step=1, format="🌶️ %d")
 
-    # 음식 선택
-    selected_food = st.selectbox("음식 선택", foods)
-
-    # null 값을 선택한 경우
-    if selected_food == "치즈":
-        is_null = st.write("UNKNOWN")
-        if is_null:
-            spicy_level = None
-        else:
-        # "치즈"인 경우 슬라이더바를 비활성화하고 불투명하게 표시
-            with st.empty():
-                spicy_level = None
-    else:
-        spicy_level = st.slider("맵기 단계", min_value=0, max_value=3, value=spiciness_levels[selected_food], step=1, format="🌶️ %d")
-
-    # 선택된 맵기 단계와 null 여부에 따라 결과 출력
-    if spicy_level is None:
-        st.write(f"{selected_food}의 맵기 단계: Null")
-    else:
-        st.write(f"{selected_food}의 맵기 단계:", spicy_level)
+    # # 선택된 맵기 단계와 null 여부에 따라 결과 출력
+    # if spicy_level is None:
+    #     st.write(f"{selected_food}의 맵기 단계: Null")
+    # else:
+    #     st.write(f"{selected_food}의 맵기 단계:", spicy_level)
 
 
 def exchange_rate_page():
@@ -300,17 +264,23 @@ def main():
 
     # Language selection using selectbox
     selected_language = st.sidebar.selectbox("Select Language", ["English", "Chinese", "Japanese"])
+
+    # 음식 목록 생성
+    foods = ['치즈퐁듀랍스터&씨푸드', '스모크우드박스안심스테이크'] # 은지네에서 받은 ocr 결과 리스트로 수정
+
+    # 음식 선택
+    selected_food = st.selectbox("음식 선택", foods)
     
     if navigation == "🏠 Home":
         home_page()
     elif navigation == "🍔 Food Information":
-        food_info_page()
+        food_info_page(selected_food)
     elif navigation == "🥗 Ingredients":
-        Ingredients(selected_language)
+        Ingredients(selected_food)
     elif navigation == "🚫 Allergen Information":
-        allergen_page()
+        allergen_page(selected_food, selected_language)
     elif navigation == "🌶️ Spiciness Level":
-        spiciness_page()
+        spiciness_page(selected_food)
     elif navigation == "💱 Currency Converter":
         exchange_rate_page()
 
