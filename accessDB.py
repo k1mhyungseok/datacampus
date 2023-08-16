@@ -48,28 +48,14 @@ def db_finder(food_name, info, df):
         return allergy_data
 
     elif info == '알러지en': # 알러지 영어.ver
-        allergy_list = df.loc[(df['ko'] == food_name)]['allergy.en']
+        allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
         allergy_data ={
             'image' : ["allergy_image/{}_image.jpg".format(x) for x in allergy_list],
-            'description' : allergy_list
+            'description' : [y for x in df.loc[(df['ko'] == food_name)]['allergy.en'] for y in x]
         }
         return allergy_data
-
-    # elif info == '맵기단계':
-    #     spicy_level = df.loc[(df['ko']== food_name)]['spicy_level']
-    #     if spicy_level == np.nan:
-    #         return None
-    #     else:
-    #         return 
-    
-    # elif info == "식재료ko": #Ingredent.ko
-    #     return None
-    
-    # elif info == "":
-    #     return None
-
-    # elif info == "":
-    #     return None
+        
+    # elif info == 
 
 
 

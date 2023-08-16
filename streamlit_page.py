@@ -105,7 +105,8 @@ def allergen_page(selected_food, selected_language):
     st.write(" ")
     st.write(" ")
 
-    info = '알러지ko'
+    info = '알러지ko' #en 지원 안됨
+
     
     # 알러지에 대한 사진과 설명
     allergy_data = ac.db_finder(selected_food, info, df)
