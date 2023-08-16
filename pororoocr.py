@@ -48,6 +48,8 @@ def main():
             df = pd.DataFrame(data, columns=["결과"])
             st.table(df)
 
+            resultz_list = df["결과"].tolist()
+
             # OCR이 끝난 후 파일 삭제
             os.remove(image_path)
 
