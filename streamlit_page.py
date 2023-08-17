@@ -87,7 +87,7 @@ def food_info_page(foods, df=df, img_path = food_img_path):
 
 def Ingredients(selected_food, selected_language = 'description.ko'):
 # 음식에 들어있는 재료에 대한 사진과 설명 
-    st.title("Ingredients")
+    st.title("Main Ingredients")
     st.markdown("<p style='font-size: 20px;'>The ingredients in this food are as follows.</p>", unsafe_allow_html=True)
     st.write(" ")
     info = '식재료'
@@ -107,9 +107,9 @@ def Ingredients(selected_food, selected_language = 'description.ko'):
             st.write(ingredient_data[language][i])
 
 
-def allergen_page(selected_food):
-    st.title("Allergen Information")
-    st.markdown("<p style='font-size: 20px;'>This food can cause the following allergies.</p>", unsafe_allow_html=True)
+def allergen_page(selected_food, selected_language):
+    st.title("Allergy Advice")
+    st.markdown("<p style='font-size: 20px;'>Selected food contain : </p>", unsafe_allow_html=True)
     st.write(" ")
     st.write(" ")
 
@@ -119,12 +119,16 @@ def allergen_page(selected_food):
     # 알러지에 대한 사진과 설명
     allergy_data = ac.db_finder(selected_food, info, df)
 
+    image_spacing = "20px"
+
     cols = st.columns(len(allergy_data['description.ko']))
 
     for i in range(len(allergy_data['description.ko'])):
         with cols[i]:
+            st.markdown(f"<p style='font-weight: bold;'>{allergy_data['description.ko'][i]}</p>", unsafe_allow_html=True)
             st.image(allergy_data['image'][i], width=200)
-            st.write(allergy_data["description.ko"][i])
+    
+    st.markdown(f"<style>img {{ margin-bottom: {image_spacing}; }}</style>", unsafe_allow_html=True)
 
 def spiciness_page(selected_food):
     st.title("Spiciness Level")
@@ -266,7 +270,7 @@ def main():
     image = Image.open('logowbg.png')
 
     st.sidebar.image("logowbg.png", use_column_width=True)
-    navigation = st.sidebar.radio("YUMSCAN", ["🏠 Home", "🍔 Food Information", "🥗 Ingredients", "🚫 Allergen Information", "🌶️ Spiciness Level", "💱 Currency Converter"], key="navigation")
+    navigation = st.sidebar.radio("YUMSCAN", ["🏠 Home", "🍔 Food Information", "🥗 Main Ingredients", "🚫 Allergy Advice", "🌶️ Spiciness Level", "💱 Currency Converter"], key="navigation")
     
     # Separator line
     st.sidebar.markdown("<div class='sidebar-separator'></div>", unsafe_allow_html=True)
@@ -279,16 +283,16 @@ def main():
 
  
     # 음식 선택
-    selected_food = st.selectbox("음식 선택", foods)
+    selected_food = st.selectbox("Selected food", foods)
     ac.save_image(foods, col = 'ingredients.ko', df=df, img_path=ingredient_img_path)
     ac.save_image(foods, col = 'ko', df=df, img_path=food_img_path)
     if navigation == "🏠 Home":
         home_page()
     elif navigation == "🍔 Food Information":
         food_info_page(foods)
-    elif navigation == "🥗 Ingredients":
+    elif navigation == "🥗 Main Ingredients":
         Ingredients(selected_food, selected_language)
-    elif navigation == "🚫 Allergen Information":
+    elif navigation == "🚫 Allergy Advice":
         allergen_page(selected_food, selected_language)
     elif navigation == "🌶️ Spiciness Level":
         spiciness_page(selected_food)
