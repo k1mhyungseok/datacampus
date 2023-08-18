@@ -63,14 +63,15 @@ def db_finder(food_name, info, df):
         }
         return ingredient_data
 
-    # elif info == '알러지en': # 알러지 영어.ver
-    #     allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
-        
-    #     allergy_data ={
-    #         'image' : ["allergy_image/{}_image.jpg".format(x) for x in allergy_list],
-    #         'description' : [y for x in df.loc[(df['ko'] == food_name)]['allergy.en'] for y in x]
-    #     }
-    #     return allergy_data
+     elif info == '맵기단계': #맵기 단계 반환
+        df['spicy_level'] = df['spicy_level'].apply(lambda x: None if pd.isna(x) or x == np.inf else int(x)).astype('Int64')
+        spicy_data =  df[df['ko'] == food_name]['spicy_level']
+
+        if spicy_data.isin([0, 1, 2, 3]).any():
+            return spicy_data.item() # 맵기단계가 있을 경우 맵기 단계를 정수형으로 return
+        else:
+            return None # 맵기단계가 없을 경우 return None
+
     
 
 
