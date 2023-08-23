@@ -4,11 +4,13 @@ import time
 from PIL import Image
 import accessDB as ac
 import pandas as pd
+import porolate as pl
+import pickle
 
 db_path = 'db_v5.csv'
 allergy_img_path = 'allergy_image'
 ingredient_img_path = 'ingredient_image'
-food_img_path = 'food_image'
+food_img_path = '/home/hseok0319/team_prj/food_image'
 df = ac.read_db(db_path)
 
 def home_page():
@@ -55,6 +57,21 @@ def home_page():
             else:
                 st.image(uploaded_photo)
 
+        if uploaded_photo or camera_photo is not None:
+            progress_bar.progress(0)
+            st.write("Analyzing texts...please wait...")
+
+            pl.ocrmain(uploaded_photo, camera_photo)
+            
+            for perc_completed in range(100):
+                time.sleep(0.05)
+                progress_bar.progress(perc_completed + 1)
+            
+            st.success("Done")
+           # st.selectbox("Selected food", pl.get_menu_list())
+
+
+
     col2.markdown("""
         <div style="border: 1px solid black; padding: 10px;">
             <h2>Instructions</h2>
@@ -67,7 +84,7 @@ def home_page():
         </div>
     """, unsafe_allow_html=True)
 
-def food_info_page(foods, df=df, img_path = food_img_path):
+def food_info_page(foods, df=df, img_path=food_img_path):
     st.title("Choose the food you want to get information")
     selected_food = st.radio("Select a food item", foods)
 
@@ -106,7 +123,6 @@ def Ingredients(selected_food, selected_language = 'description.ko'):
             st.image(ingredient_data['image'][i], width=200)
             st.write(ingredient_data[language][i])
 
-
 def allergen_page(selected_food, selected_language):
     st.title("Allergy Advice")
     st.markdown("<p style='font-size: 20px;'>Selected food contain : </p>", unsafe_allow_html=True)
@@ -115,7 +131,6 @@ def allergen_page(selected_food, selected_language):
 
     info = '알러지' #en 지원 안됨
 
-    
     # 알러지에 대한 사진과 설명
     allergy_data = ac.db_finder(selected_food, info, df)
 
@@ -127,36 +142,26 @@ def allergen_page(selected_food, selected_language):
         with cols[i]:
             st.markdown(f"<p style='font-weight: bold;'>{allergy_data['description.ko'][i]}</p>", unsafe_allow_html=True)
             st.image(allergy_data['image'][i], width=200)
-    
+
     st.markdown(f"<style>img {{ margin-bottom: {image_spacing}; }}</style>", unsafe_allow_html=True)
 
 def spiciness_page(selected_food):
     st.title("Spiciness Level")
-
-    # info = '맵기단계'
-    # ac.db_finder(selected_food, info, df)
-
-    # # null 값을 선택한 경우
-    # if selected_food == "치즈":
-    #     is_null = st.write("UNKNOWN")
-    #     if is_null:
-    #         spicy_level = None
-    #     else:
-    #     # "치즈"인 경우 슬라이더바를 비활성화하고 불투명하게 표시
-    #         with st.empty():
-    #             spicy_level = None
-    # else:
-    #     spicy_level = st.slider("맵기 단계", 
-    #                             min_value=0, max_value=3, 
-    #                             value=spiciness_levels[selected_food], 
-    #                             step=1, format="🌶️ %d")
-
-    # # 선택된 맵기 단계와 null 여부에 따라 결과 출력
-    # if spicy_level is None:
-    #     st.write(f"{selected_food}의 맵기 단계: Null")
-    # else:
-    #     st.write(f"{selected_food}의 맵기 단계:", spicy_level)
-
+    
+    info = '맵기단계'
+    spicy_data = ac.db_finder(selected_food, info, df)
+    spicy_level = None
+    if spicy_data is None:
+        st.write(f"<h2><b>{selected_food}의 맵기 단계: NULL</b></h2>", unsafe_allow_html=True)
+        with st.empty():
+            # 슬라이더 바를 빈 공간으로 만들어 슬라이더를 사라지게 함
+            spicy_data = None
+    else:
+        st.write(f"{selected_food}의 맵기 단계:", spicy_data)
+        st.slider("맵기 단계",
+                    min_value=0, max_value=3,
+                    value=int(spicy_data),
+                    step=1, format="🌶️ %d")
 
 def exchange_rate_page():
     def get_exchange_rates(api_key):
@@ -207,7 +212,7 @@ def exchange_rate_page():
     if USD_currency is not None:
         USD_currency = float(USD_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1000 {BASE_currency} = :blue[{USD_currency*1000:.4f} USD]")
+        st.write(f"</h2></b>1000 {BASE_currency} = {USD_currency*1000:.4f} USD</b></h2>", unsafe_allow_html=True)
     else:
         st.write("USD의 환율 정보가 없습니다.")
 
@@ -216,7 +221,8 @@ def exchange_rate_page():
     if JPY_currency is not None:
         JPY_currency = float(JPY_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1000 {BASE_currency} = :blue[{JPY_currency*1000:.4f} JPY]")
+        #st.write(f"1000 {BASE_currency} = :[{JPY_currency*1000:.4f} JPY]")
+        st.write(f"</h2></b>1000 {BASE_currency} = {JPY_currency*1000:.4f} JPY</b></h2>", unsafe_allow_html=True)
     else:
         st.write("JPY의 환율 정보가 없습니다.")
 
@@ -225,7 +231,8 @@ def exchange_rate_page():
     if CNY_currency is not None:
         CNY_currency = float(CNY_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1000 {BASE_currency} = :blue[{CNY_currency*1000:.4f} CNY]")
+        st.write(f"</h2></b>1000 {BASE_currency} = {CNY_currency*1000:.4f} CNY</b></h2>", unsafe_allow_html=True)
+        #st.write(f"1000 {BASE_currency} = :[{CNY_currency*1000:.4f} CNY]")
     else:
         st.write("CNY의 환율 정보가 없습니다.")
 
@@ -234,7 +241,8 @@ def exchange_rate_page():
     if TWD_currency is not None:
         TWD_currency = float(TWD_currency)
         # 문자열을 실수형으로 변환
-        st.write(f"1000 {BASE_currency} = :blue[{TWD_currency*1000:.4f} TWD]")
+        st.write(f"</h2></b>1000 {BASE_currency} = {TWD_currency*1000:.4f} TWD</b></h2>", unsafe_allow_html=True)
+        #st.write(f"1000 {BASE_currency} = :[{TWD_currency*1000:.4f} TWD]")
     else:
         st.write("TWD의 환율 정보가 없습니다.")
 
@@ -260,7 +268,9 @@ def exchange_rate_page():
     TARGET = st.selectbox("TO", target_currencies, key="TARGET")
 
     converted_amount = BASE * EXCHANGE[TARGET]
-    st.title(f"{BASE:.2f} {BASE_currency} = :blue[{converted_amount:.2f} {TARGET}]")
+    st.markdown(f"{BASE:.2f} {BASE_currency} = <span style='font-size:32px; color: blue;'>{converted_amount:.2f} {TARGET}</span>", unsafe_allow_html=True)
+    #st.title(f"{BASE:.2f} {BASE_currency} = <span style='color: blue;'>{converted_amount:.2f} {TARGET}</span>", unsafe_allow_html=True)
+    #st.title(f"{BASE:.2f} {BASE_currency} = :[{converted_amount:.2f} {TARGET}]")
 
 # Main app
 def main():
@@ -279,13 +289,18 @@ def main():
     selected_language = st.sidebar.selectbox("Select Language", ["English", "Chinese", "Japanese"])
 
     # 음식 목록 생성
-    foods = ['치즈퐁듀랍스터&씨푸드', '스모크우드박스안심스테이크'] # 은지네에서 받은 ocr 결과 리스트로 수정
+    foods = pl.get_menu_list() # 은지네에서 받은 ocr 결과 리스트로 수정
 
  
     # 음식 선택
+
+    selected_col_ingredients = 'ingredients.ko'
+    selected_col_ko = 'ko'
+
     selected_food = st.selectbox("Selected food", foods)
-    ac.save_image(foods, col = 'ingredients.ko', df=df, img_path=ingredient_img_path)
-    ac.save_image(foods, col = 'ko', df=df, img_path=food_img_path)
+    ac.save_image(foods, col=selected_col_ingredients, df=df, img_path=ingredient_img_path)
+    ac.save_image(foods, col=selected_col_ko, df=df, img_path=food_img_path)    
+
     if navigation == "🏠 Home":
         home_page()
     elif navigation == "🍔 Food Information":

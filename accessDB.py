@@ -42,6 +42,7 @@ def find_image(img_path, target):
 
 ### 사용법 df_finder('음식명', '원하는 정보', db 저장한 객체명)
 def db_finder(food_name, info, df):
+
     if info == '알러지': # 알러지 한국어.ver
         allergy_list = [y for x in df.loc[(df['ko'] == food_name)]['allergy.ko'] for y in x]
         allergy_data ={
@@ -50,7 +51,8 @@ def db_finder(food_name, info, df):
             'description.en' : [y for x in df.loc[(df['ko'] == food_name)]['allergy.en'] for y in x]
         }
         return allergy_data
-    
+
+
     elif info == '식재료':
         ingredient_list = [y for x in df.loc[(df['ko'] == food_name)]['ingredients.ko'] for y in x]
         ingredient_data = {
@@ -63,7 +65,7 @@ def db_finder(food_name, info, df):
         }
         return ingredient_data
 
-     elif info == '맵기단계': #맵기 단계 반환
+    elif info == '맵기단계': #맵기 단계 반환
         df['spicy_level'] = df['spicy_level'].apply(lambda x: None if pd.isna(x) or x == np.inf else int(x)).astype('Int64')
         spicy_data =  df[df['ko'] == food_name]['spicy_level']
 
@@ -72,24 +74,27 @@ def db_finder(food_name, info, df):
         else:
             return None # 맵기단계가 없을 경우 return None
 
-    
-
 
 def save_image(food_name, col, df, img_path):
-            
-    if col == 'ko':
-        search_terms = [df.loc[df['ko']==x][col].values[0] for x in food_name]
-    else:
-        search_terms = []
-        for i in df.loc[df['ko'].isin(food_name)][col].values:
-            for j in i:
-                search_terms.append(j) 
+    
+    search_terms = []
 
+    if col == 'ko':
+        search_terms.extend(df.loc[df['ko'].isin(food_name)][col])
+    else:
+        for i in df.loc[df['ko'].isin(food_name)][col].values:
+            if isinstance(i, (list, tuple)):
+                for j in i:
+                    search_terms.append(j)
+            else:
+                search_terms.append(i)
+                
     if not os.path.exists(img_path):
         os.makedirs(img_path)
     else:
         for f in os.listdir(img_path):
             os.remove(os.path.join(img_path, f))
+
 
     url_format = "https://www.google.com/search?q={}&tbm=isch"
 
@@ -120,8 +125,6 @@ def save_image(food_name, col, df, img_path):
                     with open(image_filename, "wb") as image_file:
                         image_file.write(image_data)
                     break
-                    
-
 
 
 
